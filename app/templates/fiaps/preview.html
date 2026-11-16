@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Pré-visualização da FIAP | SENAI-SP{% endblock %}
+
+{% block content %}
+  <header class="page-header">
+    <div>
+      <p class="eyebrow"><a href="{{ url_for('main.dashboard') }}">FIAP / PAINEL</a> / PRÉ-VISUALIZAÇÃO</p>
+      <h1>Revise a ficha</h1>
+      <p class="page-intro">Confira as informações antes de salvar a avaliação.</p>
+    </div>
+  </header>
+
+  <article class="fiap-document">
+    <header class="fiap-document-header">
+      <img src="{{ url_for('static', filename='img/logo_senai.png') }}" alt="SENAI-SP">
+      <div>
+        <p>FICHA INDIVIDUAL DE AVALIAÇÃO PERIÓDICA</p>
+        <span>Pré-visualização</span>
+      </div>
+    </header>
+    <section class="fiap-summary">
+      <div><span>Nome do aluno</span><strong>{{ student.name }}</strong></div>
+      <div><span>Turma</span><strong>{{ class_group.name }}</strong></div>
+      <div><span>Empresa</span><strong>{{ payload.company or "—" }}</strong></div>
+      <div><span>Docente</span><strong>{{ current_user.name }}</strong></div>
+      <div><span>Data</span><strong>{{ evaluated_on.strftime("%d/%m/%Y") }}</strong></div>
+      <div><span>Unidade curricular</span><strong>{{ unit.name }}</strong></div>
+      <div><span>Carga horária (total)</span><strong>{{ payload.workload_hours }} h</strong></div>
+      <div><span>Média da classe</span><strong>{{ payload.class_average }}</strong></div>
+      <div><span>Nota do aluno</span><strong>{{ payload.student_grade }}</strong></div>
+      <div><span>Horas/faltas (limite)</span><strong>{{ payload.absence_limit_hours }}</strong></div>
+      <div><span>Horas/faltas (total)</span><strong>{{ payload.absences_hours }}</strong></div>
+    </section>
+    <section class="fiap-comments">
+      <div><h2>Principais dificuldades</h2><p>{{ payload.difficulties or "—" }}</p></div>
+      <div><h2>Recomendações do professor ao aluno/responsável</h2><p>{{ payload.recommendations or "—" }}</p></div>
+      <div><h2>Providências do professor e da escola para auxiliar o aluno</h2><p>{{ payload.school_actions or "—" }}</p></div>
+      <div><h2>Outras observações</h2><p>{{ payload.observations or "—" }}</p></div>
+    </section>
+  </article>
+
+  <div class="preview-actions fiap-save-actions">
+    <form method="post" action="{{ url_for('fiaps.save_sheet', draft_id=draft.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="primary-button action-link" type="submit">Confirmar e salvar</button>
+    </form>
+    <form method="post" action="{{ url_for('fiaps.discard_sheet', draft_id=draft.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="secondary-button action-link" type="submit">Descartar pré-visualização</button>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Importar alunos | FIAP SENAI-SP{% endblock %}
+
+{% block content %}
+  <header class="page-header">
+    <div>
+      <p class="eyebrow"><a href="{{ url_for('main.dashboard') }}">FIAP / PAINEL</a> / ALUNOS</p>
+      <h1>Importar alunos</h1>
+      <p class="page-intro">Revise os dados antes de confirmar a inclusão na turma escolhida.</p>
+    </div>
+    <a class="secondary-button action-link" href="{{ url_for('students.list_students') }}">Voltar aos alunos</a>
+  </header>
+
+  {% if batch %}
+    <section class="catalog-card import-preview" aria-labelledby="preview-title">
+      <div class="card-heading">
+        <div>
+          <h2 id="preview-title">Pré-visualização</h2>
+          <p class="page-intro">{{ batch.class_group.name }} · {{ rows|length }} alunos na planilha</p>
+        </div>
+        <span class="import-status {{ 'import-status-error' if batch.has_errors else 'import-status-ready' }}">
+          {{ "Corrija os erros antes de importar" if batch.has_errors else "Pronto para importar" }}
+        </span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th scope="col">Linha</th><th scope="col">Nome do aluno</th><th scope="col">Validação</th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.row_number }}</td>
+                <td>{{ row.name if row.name else "—" }}</td>
+                <td>
+                  {% if row.error %}<span class="field-error">{{ row.error }}</span>{% else %}<span class="validation-ok">Válido</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="preview-actions">
+        {% if not batch.has_errors %}
+          <form method="post" action="{{ url_for('students.confirm_import', batch_id=batch.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="primary-button action-link" type="submit">Confirmar importação</button>
+          </form>
+        {% else %}
+          <p class="field-error">Nenhum aluno foi cadastrado. Ajuste a planilha e envie novamente.</p>
+        {% endif %}
+        <form method="post" action="{{ url_for('students.cancel_import', batch_id=batch.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="secondary-button action-link" type="submit">Descartar prévia</button>
+        </form>
+      </div>
+    </section>
+  {% else %}
+    <section class="catalog-card import-card" aria-labelledby="upload-title">
+      <div class="card-heading">
+        <h2 id="upload-title">Enviar planilha</h2>
+      </div>
+      <p class="import-instructions">
+        Envie um arquivo <strong>.xlsx</strong> ou <strong>.csv</strong> codificado em UTF-8, com a coluna
+        <strong>nome</strong> na primeira aba. A planilha pode conter até 1.000 alunos e o arquivo deve ter
+        no máximo 5 MB. Os nomes serão associados à turma selecionada.
+      </p>
+      {% if not classes %}
+        <p class="empty-state">Cadastre uma turma antes de importar alunos.</p>
+      {% else %}
+        <form method="post" enctype="multipart/form-data" class="catalog-form import-form">
+          {{ form.hidden_tag() }}
+          <div class="form-field">
+            {{ form.class_id.label }}
+            {{ form.class_id(class_="catalog-input") }}
+            {% for error in form.class_id.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="form-field">
+            {{ form.file.label }}
+            {{ form.file(class_="catalog-input", accept=".csv,.xlsx") }}
+            {% for error in form.file.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+          </div>
+          {{ form.submit(class_="primary-button catalog-submit") }}
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}

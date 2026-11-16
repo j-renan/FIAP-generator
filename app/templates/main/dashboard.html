@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Painel | FIAP SENAI-SP{% endblock %}
+
+{% block content %}
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">FIAP / INÍCIO</p>
+      <h1>Painel</h1>
+      <p class="page-intro">Bem-vindo(a), {{ current_user.name }}.</p>
+    </div>
+  </header>
+  <section class="welcome-card">
+    <span class="welcome-icon" aria-hidden="true">✓</span>
+    <div>
+      <h2>Cadastros acadêmicos</h2>
+      <p>Comece cadastrando os cursos, as unidades curriculares e as turmas da sua unidade.</p>
+      <div class="dashboard-actions">
+        <a class="primary-button action-link" href="{{ url_for('catalogs.courses') }}">Cadastrar cursos</a>
+        <a class="secondary-button action-link" href="{{ url_for('catalogs.curricular_units') }}">Unidades curriculares</a>
+        <a class="secondary-button action-link" href="{{ url_for('catalogs.classes') }}">Turmas</a>
+        <a class="secondary-button action-link" href="{{ url_for('students.list_students') }}">Alunos</a>
+        <a class="secondary-button action-link" href="{{ url_for('fiaps.list_sheets') }}">Fichas FIAP</a>
+        <a class="primary-button action-link" href="{{ url_for('fiaps.create_sheet') }}">Nova ficha</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}FIAP | SENAI-SP{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% if current_user.is_authenticated %}
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="{{ url_for('main.dashboard') }}">
+          <img class="brand-logo" src="{{ url_for('static', filename='img/logo_senai.png') }}" alt="SENAI-SP">
+          <span class="brand-caption">Fichas de avaliação</span>
+        </a>
+        <nav class="side-nav" aria-label="Navegação principal">
+          <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}">Painel</a>
+          <span class="nav-section">Cadastros</span>
+          <a class="nav-link{% if request.endpoint.startswith('catalogs.courses') or request.endpoint == 'catalogs.edit_course' or request.endpoint == 'catalogs.delete_course' %} active{% endif %}" href="{{ url_for('catalogs.courses') }}">Cursos</a>
+          <a class="nav-link{% if 'curricular_unit' in request.endpoint %} active{% endif %}" href="{{ url_for('catalogs.curricular_units') }}">Unidades curriculares</a>
+          <a class="nav-link{% if 'class' in request.endpoint %} active{% endif %}" href="{{ url_for('catalogs.classes') }}">Turmas</a>
+          <a class="nav-link{% if request.endpoint.startswith('students.') %} active{% endif %}" href="{{ url_for('students.list_students') }}">Alunos</a>
+          <a class="nav-link{% if request.endpoint.startswith('fiaps.') %} active{% endif %}" href="{{ url_for('fiaps.list_sheets') }}">Fichas FIAP</a>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="user-name">{{ current_user.name }}</span>
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="logout-button" type="submit">Sair</button>
+          </form>
+        </div>
+      </aside>
+      <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-list" role="status">
+              {% for category, message in messages %}
+                <p class="flash flash-{{ category }}">{{ message }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  {% else %}
+    <main class="login-layout">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-list login-flashes" role="status">
+            {% for category, message in messages %}
+              <p class="flash flash-{{ category }}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block login_content %}{% endblock %}
+    </main>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

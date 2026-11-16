@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Arquivo muito grande | FIAP SENAI-SP{% endblock %}
+
+{% block content %}
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">FIAP / ALUNOS</p>
+      <h1>Arquivo muito grande</h1>
+      <p class="page-intro">O limite para envio é de 5 MB. Selecione uma planilha menor e tente novamente.</p>
+    </div>
+  </header>
+  <a class="primary-button action-link" href="{{ url_for('students.import_students') }}">Voltar à importação</a>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Alunos | FIAP SENAI-SP{% endblock %}
+
+{% block content %}
+  <header class="page-header">
+    <div>
+      <p class="eyebrow"><a href="{{ url_for('main.dashboard') }}">FIAP / PAINEL</a> / CADASTROS</p>
+      <h1>Alunos</h1>
+      <p class="page-intro">Cadastre alunos individualmente ou importe uma planilha para uma turma.</p>
+    </div>
+    <a class="primary-button action-link" href="{{ url_for('students.import_students') }}">Importar planilha</a>
+  </header>
+
+  <div class="catalog-layout">
+    <section class="catalog-card" aria-labelledby="student-form-title">
+      <div class="card-heading">
+        <h2 id="student-form-title">{{ "Editar aluno" if edit_id else "Novo aluno" }}</h2>
+        {% if edit_id %}
+          <a class="text-link" href="{{ url_for('students.list_students') }}">Cancelar edição</a>
+        {% endif %}
+      </div>
+      {% if not classes %}
+        <p class="empty-state">Cadastre uma turma antes de adicionar alunos.</p>
+      {% else %}
+        <form method="post" class="catalog-form">
+          {{ form.hidden_tag() }}
+          {% for field in form if field.name not in ("csrf_token", "submit") %}
+            <div class="form-field">
+              {{ field.label }}
+              {{ field(class_="catalog-input") }}
+              {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+          {% endfor %}
+          {{ form.submit(class_="primary-button catalog-submit") }}
+        </form>
+      {% endif %}
+    </section>
+
+    <section class="catalog-card student-filter" aria-labelledby="student-filter-title">
+      <div class="card-heading"><h2 id="student-filter-title">Consultar alunos por turma</h2></div>
+      <form method="get" action="{{ url_for('students.list_students') }}" class="student-filter-form">
+        <div class="form-field">
+          <label for="student-class-filter">Turma</label>
+          <select class="catalog-input" id="student-class-filter" name="class_id" required>
+            <option value="">Selecione uma turma</option>
+            {% for class_group in classes %}
+              <option value="{{ class_group.id }}" {% if selected_class_id == class_group.id %}selected{% endif %}>{{ class_group.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="primary-button action-link" type="submit">Carregar alunos</button>
+      </form>
+    </section>
+
+    <section class="catalog-card" aria-labelledby="students-title">
+      <div class="card-heading">
+        <h2 id="students-title">{{ "Alunos da turma" if selected_class_id else "Alunos cadastrados" }}</h2>
+        <span class="record-count">{{ records|length }}</span>
+      </div>
+      {% if rows %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th scope="col">Nome do aluno</th><th scope="col">Turma</th><th scope="col">Ações</th></tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  {% for value in row["values"] %}<td>{{ value }}</td>{% endfor %}
+                  <td>
+                    <div class="row-actions">
+                      <a class="text-link" href="{{ url_for('students.edit_student', record_id=row['id']) }}">Editar</a>
+                      <form method="post" action="{{ url_for('students.delete_student', record_id=row['id']) }}" onsubmit="return confirm('Excluir este aluno?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="delete-button" type="submit">Excluir</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state">
+          {% if not selected_class_id %}
+            Selecione uma turma para carregar a lista de alunos.
+          {% else %}
+            Nenhum aluno cadastrado nesta turma.
+          {% endif %}
+        </p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar | FIAP SENAI-SP{% endblock %}
+{% block body_class %}login-page{% endblock %}
+
+{% block login_content %}
+  <section class="login-card" aria-labelledby="login-title">
+    <div class="login-brand">
+      <img class="login-logo" src="{{ url_for('static', filename='img/logo_senai.png') }}" alt="SENAI-SP">
+    </div>
+    <div class="login-heading">
+      <p class="eyebrow">FIAP</p>
+      <h1 id="login-title">Acesse sua conta</h1>
+      <p>Entre para acompanhar as fichas de avaliação dos alunos.</p>
+    </div>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="form-field">
+        {{ form.email.label }}
+        {{ form.email(autocomplete="username", placeholder="nome@instituicao.edu.br") }}
+        {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="form-field">
+        {{ form.password.label }}
+        {{ form.password(autocomplete="current-password", placeholder="Digite sua senha") }}
+        {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      <button class="primary-button login-submit" type="submit">{{ form.submit.label.text }}</button>
+    </form>
+    <p class="login-help">Problemas para acessar? Procure a coordenação da sua unidade.</p>
+  </section>
+{% endblock %}

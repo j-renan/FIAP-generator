@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Nova FIAP | SENAI-SP{% endblock %}
+
+{% block content %}
+  <header class="page-header">
+    <div>
+      <p class="eyebrow"><a href="{{ url_for('main.dashboard') }}">FIAP / PAINEL</a> / FICHAS</p>
+      <h1>Nova ficha de avaliação</h1>
+      <p class="page-intro">Preencha os dados em uma única etapa. A ficha será salva após sua confirmação.</p>
+    </div>
+    <a class="secondary-button action-link" href="{{ url_for('fiaps.list_sheets') }}">Voltar às fichas</a>
+  </header>
+
+  {% if not classes %}
+    <section class="catalog-card"><p class="empty-state">Cadastre turmas antes de criar uma ficha.</p></section>
+  {% elif not units %}
+    <section class="catalog-card"><p class="empty-state">Cadastre unidades curriculares antes de criar uma ficha.</p></section>
+  {% else %}
+    <form method="post" class="fiap-form">
+      {{ form.hidden_tag() }}
+
+      <section class="catalog-card fiap-section" aria-labelledby="identification-title">
+        <div class="card-heading"><h2 id="identification-title">Identificação</h2></div>
+        <div class="fiap-fields">
+          {% for field in form if field.name in ("class_id", "student_id", "curricular_unit_id", "evaluated_on", "company") %}
+            <div class="form-field">
+              {{ field.label }}
+              {% if field.name == "student_id" %}
+                <div class="fiap-student-selector" data-students-url="{{ url_for('fiaps.students_for_class') }}">
+                  {{ field(class_="catalog-input", disabled=not students) }}
+                  <span class="form-hint" id="student-loading-status" role="status">
+                    {% if form.class_id.data and students %}{{ students|length }} aluno(s) carregado(s).{% else %}Selecione uma turma para carregar os alunos.{% endif %}
+                  </span>
+                </div>
+              {% elif field.name == "curricular_unit_id" %}
+                <div class="fiap-unit-selector" data-absence-limits='{{ unit_absence_limits | tojson }}'>
+                  {{ field(class_="catalog-input") }}
+                </div>
+              {% else %}
+                {{ field(class_="catalog-input") }}
+              {% endif %}
+              {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+          {% endfor %}
+          <div class="form-field">
+            <label for="teacher-name">Docente</label>
+            <input id="teacher-name" class="catalog-input" type="text" value="{{ current_user.name }}" readonly>
+          </div>
+        </div>
+        <p class="form-hint">Selecione primeiro a turma para carregar os alunos. A carga horária e o limite máximo de faltas vêm da unidade curricular.</p>
+      </section>
+
+      <section class="catalog-card fiap-section" aria-labelledby="assessment-title">
+        <div class="card-heading">
+          <div>
+            <h2 id="assessment-title">Avaliação e frequência</h2>
+            <p class="form-hint">Notas de 0 a 100, em números inteiros.</p>
+          </div>
+        </div>
+        <div class="fiap-fields">
+          {% for field in form if field.name in ("class_average", "student_grade", "absence_limit_hours", "absences_hours") %}
+            <div class="form-field">
+              {{ field.label }}
+              {{ field(class_="catalog-input") }}
+              {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="catalog-card fiap-section" aria-labelledby="comments-title">
+        <div class="card-heading"><h2 id="comments-title">Acompanhamento do aluno</h2></div>
+        <div class="fiap-fields fiap-text-fields">
+          {% for field in form if field.name in ("difficulties", "recommendations", "school_actions", "observations") %}
+            <div class="form-field fiap-field-wide">
+              {{ field.label }}
+              {{ field(class_="catalog-input") }}
+              {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <div class="fiap-form-actions">
+        {{ form.submit(class_="primary-button action-link") }}
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/fiap-form.js') }}" defer></script>
+{% endblock %}
